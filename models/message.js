@@ -18,7 +18,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Message.init({
-    session_id: DataTypes.INTEGER,
+    session_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+          model: 'Session',
+          key: 'id'
+      }
+  },
     content: DataTypes.TEXT,
     type: DataTypes.STRING
   }, {
