@@ -2,6 +2,7 @@ const express = require('express');
 const { sequelize } = require('./models');
 
 const chatSocket = require('./sockets/chatSocket');
+const chatRoutes = require('./routes/chatRoutes');
 
 // 웹 소켓 관련
 const http = require('http');
@@ -32,6 +33,9 @@ sequelize.authenticate()
     .catch(err => {
         console.error('Unable to connect to the database:', err);
     });
+
+// 라우터 설정
+app.use('/api', chatRoutes);
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}.`);
