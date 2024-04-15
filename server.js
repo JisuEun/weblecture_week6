@@ -4,6 +4,8 @@ const { sequelize } = require('./models');
 const chatSocket = require('./sockets/chatSocket');
 const chatRoutes = require('./routes/chatRoutes');
 
+const path = require('path');
+
 // 웹 소켓 관련
 const http = require('http');
 const socketIo = require('socket.io');
@@ -24,6 +26,14 @@ const io = socketIo(server, {
 });
 
 chatSocket(io);
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Handles any requests that don't match the ones above
+app.get('*', (req, res) =>{
+    res.sendFile(path.join(__dirname+'/build/index.html'));
+});
 
 // 데이터베이스 연결 확인
 sequelize.authenticate()
