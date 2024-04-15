@@ -9,30 +9,25 @@ const path = require('path');
 // 웹 소켓 관련
 const http = require('http');
 const socketIo = require('socket.io');
-const cors = require('cors');
+//const cors = require('cors');
 
 const app = express();
-app.use(cors());  // CORS 미들웨어 적용
+//app.use(cors());  // CORS 미들웨어 적용
 app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"]
-    }
-});
+const io = socketIo(server);
 
 chatSocket(io);
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'build')));
+// React 빌드 폴더를 정적 파일로 제공
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
-// Handles any requests that don't match the ones above
-app.get('*', (req, res) =>{
-    res.sendFile(path.join(__dirname+'/build/index.html'));
+// 모든 경로에 대해 React 애플리케이션을 반환하도록 설정
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 // 데이터베이스 연결 확인
