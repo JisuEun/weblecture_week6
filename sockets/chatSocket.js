@@ -113,10 +113,6 @@ module.exports = function (io) {
             console.log(`${socket.id} disconnected`);
             // Counselee가 연결을 끊으면 Counselor에게 알림 보냄
             // 상담자 연결 해제 시 세션 업데이트
-            if (currentSession) {
-                await currentSession.update({ status: 'Complete' });
-                currentSession = null;
-            }
             if (socket === counseleeSocket) {
                 if (counselorSocket) {
                     counselorSocket.emit('message', {
@@ -126,7 +122,18 @@ module.exports = function (io) {
                 }
                 counseleeSocket = null;
             } else if (socket === counselorSocket) {
+                // 상담사의 연결이 끊어지면 사용자에게 알림을 보내고 메인화면으로 돌아가게 함
+                if (counseleeSocket) {
+                    counseleeSocket.emit('chat ended', '상담사의 연결이 끊어졌습니다.');
+                    counseleeSocket.disconnect(true);
+                }
                 counselorSocket = null;
+            }
+
+            // 상담자 연결 해제 시 세션 업데이트
+            if (currentSession) {
+                await currentSession.update({ status: 'Complete' });
+                currentSession = null;
             }
         });
     });

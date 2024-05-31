@@ -9,18 +9,33 @@ const path = require('path');
 // 웹 소켓 관련
 const http = require('http');
 const socketIo = require('socket.io');
-//const cors = require('cors');
+const cors = require('cors');
 
 const app = express();
-//app.use(cors());  // CORS 미들웨어 적용
+app.use(cors({
+    origin: 'http://localhost:3000',  // 3000번 포트만 허용
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // 허용할 HTTP 메소드
+    allowedHeaders: ['Content-Type', 'Authorization'], // 허용할 헤더
+}));
+
 app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    cors: {
+        origin: 'http://localhost:3000',  // 3000번 포트만 허용
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    }
+});
 
 chatSocket(io);
+
+// 라우터 설정
+app.use('/api', chatRoutes);
 
 // React 빌드 폴더를 정적 파일로 제공
 app.use(express.static(path.join(__dirname, 'client', 'build')));
@@ -39,8 +54,7 @@ sequelize.authenticate()
         console.error('Unable to connect to the database:', err);
     });
 
-// 라우터 설정
-app.use('/api', chatRoutes);
+
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}.`);
